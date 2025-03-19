@@ -67,8 +67,9 @@ def update_index_html(new_content_html, section_class):
     updated_html = str(soup)
 
     # Commit the updated index.html to GitHub
-    repo.update_file(INDEX_FILE_PATH, f"Updated {section_class} section", updated_html, file_sha)
-
+    response = repo.update_file(INDEX_FILE_PATH, f"Updated {section_class} section", updated_html, file_sha)
+    commit = response['commit']
+    print(commit.sha)
     return {"success": f"{section_class} updated successfully"}
 
 def generate_ai_job_description(title, company, team_name, technologies):
@@ -112,16 +113,18 @@ def get_company_url(company_name):
     # Fallback if OpenAI fails
     return f"https://www.google.com/search?q={company_name.replace(' ', '+')}"
 
-def main(req: func.HttpRequest) -> func.HttpResponse:
+def main(req: func.HttpRequest, res: func.Out[func.HttpResponse]) -> None:
     """Azure Function to update the 'Other Projects' or 'Work Experience' section in index.html"""
     
     try:
         req_body = req.get_json()
+        print(req_body)
     except ValueError:
-        return func.HttpResponse(json.dumps({"error": "Invalid JSON request"}), status_code=400, mimetype="application/json")
+        res.set(func.HttpResponse(json.dumps({"error": "Invalid JSON request"}), status_code=400, mimetype="application/json"))
+        return
 
     content_type = req_body.get("type", "").strip().lower()
-
+    print(content_type)
     if content_type == "project":
         project_title = req_body.get("title", "").strip()
         project_description = req_body.get("description", "").strip()
@@ -129,7 +132,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         project_link = req_body.get("link", "").strip()
 
         if not all([project_title, project_description, technologies]):
-            return func.HttpResponse(json.dumps({"error": "Missing required fields for project (title, description, technologies, link)"}), status_code=400, mimetype="application/json")
+            res.set(func.HttpResponse(json.dumps({"error": "Missing required fields for project (title, description, technologies, link)"}), status_code=400, mimetype="application/json"))
+            return
 
         # Generate new project HTML snippet matching the requested format
         new_content_html = f"""
@@ -158,7 +162,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             description = generate_ai_job_description(job_title, company, team_name, tec)
 
         if not all([job_title, company, team_name, year_range, description]):
-            return func.HttpResponse(json.dumps({"error": "Missing required fields for work experience (title, company, team_name, year_range, description)"}), status_code=400, mimetype="application/json")
+            res.set(func.HttpResponse(json.dumps({"error": "Missing required fields for work experience (title, company, team_name, year_range, description)"}), status_code=400, mimetype="application/json"))
+            return
 
         # Generate new work experience HTML snippet
         new_content_html = f"""
@@ -172,6 +177,9 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         update_result = update_index_html(new_content_html, "experience section")
 
     else:
-        return func.HttpResponse(json.dumps({"error": "Invalid type. Must be 'project' or 'work'."}), status_code=400, mimetype="application/json")
+        print()
+        res.set(func.HttpResponse(json.dumps({"error": "Invalid type. Must be 'project' or 'work'."}), status_code=400, mimetype="application/json"))
+        return
 
-    return func.HttpResponse(json.dumps(update_result), mimetype="application/json", status_code=200)
+    res.set(func.HttpResponse(json.dumps(update_result), mimetype="application/json", status_code=200))
+    return
