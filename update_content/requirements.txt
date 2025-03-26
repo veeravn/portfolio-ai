@@ -3,7 +3,7 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
-pygithub
+PyGithub
 openai
 beautifulsoup4
 azure-data-tables
