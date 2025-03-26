@@ -6,7 +6,7 @@ AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
 AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com"
 DEPLOYMENT_NAME = "gpt-4o"
 
-update_content_url = "http://localhost:7071/api/update_content"
+update_content_url = "https://veeravnchatbotfunction.azurewebsites.net/api/update_content"
 
 client = openai.AzureOpenAI(
     api_key=AZURE_OPENAI_KEY,
