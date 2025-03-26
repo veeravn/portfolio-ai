@@ -6,3 +6,4 @@ azure-functions
 pygithub
 openai
 beautifulsoup4
+azure-data-tables
