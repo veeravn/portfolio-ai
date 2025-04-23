@@ -1,30 +1,24 @@
 import os
 import json
-from azure.data.tables import TableServiceClient
+from azure.data.tables import TableServiceClient, UpdateMode
 
-AZURE_STORAGE_CONNECTION_STRING = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-TABLE_NAME = "CopilotSessions"
+TABLE_NAME = os.getenv("AZ_TABLE_NAME", "sessions")
+CONNECTION_STR = os.getenv("AZ_TABLE_CONNECTION")
+svc_client = TableServiceClient.from_connection_string(CONNECTION_STR)
+table_client = svc_client.get_table_client(TABLE_NAME)
 
-def get_table_client():
-    """Get Azure Table Storage client."""
-    service_client = TableServiceClient.from_connection_string(AZURE_STORAGE_CONNECTION_STRING)
-    return service_client.get_table_client(TABLE_NAME)
-
-def get_user_session(user_id):
-    """Fetch user session from Azure Table Storage."""
-    table_client = get_table_client()
+def get_user_session(user_id: str) -> dict:
     try:
-        session = table_client.get_entity(partition_key="session", row_key=user_id)
-        return json.loads(session["Data"])
+        entity = table_client.get_entity(partition_key="user", row_key=user_id)
+        return json.loads(entity.get("session_data", "{}"))
     except:
-        return None
+        return {"history": []}
 
-def save_user_session(user_id, session_data):
-    """Save user session to Azure Table Storage."""
-    table_client = get_table_client()
+def save_user_session(user_id: str, session_data: dict) -> None:
     entity = {
-        "PartitionKey": "session",
+        "PartitionKey": "user",
         "RowKey": user_id,
-        "Data": json.dumps(session_data)
+        "session_data": json.dumps(session_data)
     }
-    table_client.upsert_entity(entity)
+    table_client.upsert_entity(entity, mode=UpdateMode.MERGE)
+
