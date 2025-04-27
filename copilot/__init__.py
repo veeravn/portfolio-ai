@@ -22,7 +22,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Ask model to choose a tool or reply directly
         chat_resp = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o",
             messages=messages,
             functions=FUNCTION_SPECS,
             function_call="auto"
@@ -41,7 +41,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                 "content": json.dumps(result)
             })
             followup = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gpt-4o",
                 messages=messages
             )
             agent_reply = followup.choices[0].message.content
