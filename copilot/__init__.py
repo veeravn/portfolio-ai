@@ -2,7 +2,7 @@ import json
 import logging
 import azure.functions as func
 from openai import OpenAI
-from tools import TOOLS, FUNCTION_SPECS
+from .tools import TOOLS, FUNCTION_SPECS
 
 # Initialize OpenAI client once
 client = OpenAI()
