@@ -1,7 +1,7 @@
 """Defines available tools and their JSON schemas for OpenAI function calling."""
 import json
-from session_manager import get_user_session, save_user_session
-from copilot.ai_helper import generate_ai_response
+from .session_manager import get_user_session, save_user_session
+from .ai_helper import generate_ai_response
 from update_content.ai_helper import send_update_request
 from update_content.html_parser import parse_html
 from github_helper import commit_html
