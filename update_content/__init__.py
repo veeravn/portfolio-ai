@@ -1,60 +1,51 @@
-import json
+import json, os
 import azure.functions as func
-from .github_helper import update_index_html
-from .ai_helper import generate_ai_job_description
-from .html_parser import generate_project_html, generate_work_experience_html
+from openai import OpenAI
+from copilot.tools import FUNCTION_SPECS
+from update_content.ai_helper import add_project, add_experience
 
-def main(req: func.HttpRequest, res: func.Out[func.HttpResponse]) -> None:
-    """Azure Function to update the 'Other Projects' or 'Work Experience' section in index.html"""
+# map function-call names to actual implementations
+TOOLS = {
+    "add_project": add_project,
+    "add_experience": add_experience,
+    # … other tools …
+}
 
-    try:
-        req_body = req.get_json()
-    except ValueError:
-        res.set(func.HttpResponse(json.dumps({"error": "Invalid JSON request"}), status_code=400, mimetype="application/json"))
-        return
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-    content_type = req_body.get("type", "").strip().lower()
+async def main(req: func.HttpRequest) -> func.HttpResponse:
+    user_msg = await req.get_json()
+    messages = user_msg["messages"]
 
-    if content_type == "project":
-        project_data = {
-            "title": req_body.get("title", "").strip(),
-            "description": req_body.get("description", "").strip(),
-            "technologies": req_body.get("technologies", "").strip(),
-            "link": req_body.get("link", "#").strip()
-        }
+    # ask the LLM which tool to call
+    chat_resp = client.chat.completions.create(
+        model=os.getenv("DEPLOYMENT_NAME"),
+        messages=messages,
+        functions=FUNCTION_SPECS,
+        function_call="auto"
+    )
 
-        if not all(project_data.values()):
-            res.set(func.HttpResponse(json.dumps({"error": "Missing required fields for project"}), status_code=400, mimetype="application/json"))
-            return
+    msg = chat_resp.choices[0].message
+    if msg.finish_reason == "function_call":
+        fn_name = msg.function_call.name
+        args    = json.loads(msg.function_call.arguments)
+        # dispatch to our helper
+        result = await TOOLS[fn_name](**args)
 
-        new_content_html = generate_project_html(**project_data)
-        update_result = update_index_html(new_content_html, "projects section")
-
-    elif content_type == "work":
-        work_data = {
-            "title": req_body.get("title", "").strip(),
-            "company": req_body.get("company", "").strip(),
-            "team_name": req_body.get("team_name", "").strip(),
-            "company_url": req_body.get("company_url", "#").strip(),
-            "year_range": req_body.get("year_range", "").strip(),
-            "technologies": req_body.get("technologies", "").strip()
-        }
-
-        if not all(work_data.values()):
-            res.set(func.HttpResponse(json.dumps({"error": "Missing required fields for work experience"}), status_code=400, mimetype="application/json"))
-            return
-
-        # AI-generated description if missing
-        if not req_body.get("description"):
-            work_data["description"] = generate_ai_job_description(work_data["title"], work_data["company"], work_data["team_name"], work_data["technologies"])
-        else:
-            work_data["description"] = req_body.get("description", "").strip()
-
-        new_content_html = generate_work_experience_html(**work_data)
-        update_result = update_index_html(new_content_html, "work experience")
-
+        # feed the result back for a natural-language wrap-up
+        followup = client.chat.completions.create(
+            model=os.getenv("DEPLOYMENT_NAME"),
+            messages=[
+                *messages,
+                {"role":"function", "name":fn_name, "content": json.dumps(result)}
+            ]
+        )
+        reply = followup.choices[0].message.content
     else:
-        res.set(func.HttpResponse(json.dumps({"error": "Invalid type. Must be 'project' or 'work'."}), status_code=400, mimetype="application/json"))
-        return
+        reply = msg.content
 
-    res.set(func.HttpResponse(json.dumps(update_result), mimetype="application/json", status_code=200))
+    return func.HttpResponse(
+        json.dumps({"reply": reply}),
+        status_code=200,
+        mimetype="application/json"
+    )

@@ -1,8 +1,25 @@
-import json
-from update_content.html_parser import parse_html
-from github_helper import commit_html
+# File: update_content/ai_helper.py
 
-async def send_update_request(user_id: str, html_content: str) -> dict:
-    parsed = parse_html(html_content=html_content)
-    result = commit_html(path=parsed["path"], content=parsed["content"])
-    return {"status": "committed", "details": result}
+import json
+from .html_parser import read_portfolio_html, insert_project, insert_experience
+from .github_helper import commit_html
+
+async def add_project(user_id: str, project: dict) -> dict:
+    """
+    Reads the user's portfolio HTML, inserts a new project card,
+    and commits the updated HTML back to GitHub.
+    """
+    html = await read_portfolio_html(user_id)
+    updated = insert_project(html, project)
+    commit_result = await commit_html(user_id, updated, section="projects")
+    return {"status": "success", "section": "projects", "project": project}
+
+async def add_experience(user_id: str, experience: dict) -> dict:
+    """
+    Reads the user's portfolio HTML, inserts a new experience entry,
+    and commits the updated HTML back to GitHub.
+    """
+    html = await read_portfolio_html(user_id)
+    updated = insert_experience(html, experience)
+    commit_result = await commit_html(user_id, updated, section="experience")
+    return {"status": "success", "section": "experience", "experience": experience}

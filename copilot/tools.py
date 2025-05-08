@@ -4,7 +4,7 @@ from .session_manager import get_user_session, save_user_session
 from .ai_helper import generate_ai_response
 from update_content.ai_helper import send_update_request
 from update_content.html_parser import parse_html
-from github_helper import commit_html
+from update_content.github_helper import commit_html
 
 TOOLS = {
     "get_user_session": get_user_session,
@@ -16,6 +16,48 @@ TOOLS = {
 }
 
 FUNCTION_SPECS = [
+    {
+        "name": "add_project",
+        "description": "Add a new project entry to the portfolio's Projects section.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {"type": "string"},
+                "project": {
+                    "type": "object",
+                    "properties": {
+                        "title":       {"type": "string"},
+                        "description": {"type": "string"},
+                        "link":        {"type": "string"}
+                    },
+                    "required": ["title", "description"]
+                }
+            },
+            "required": ["user_id", "project"]
+        }
+    },
+    {
+        "name": "add_experience",
+        "description": "Add a new work-experience entry to the portfolio's Experience section.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {"type": "string"},
+                "experience": {
+                    "type": "object",
+                    "properties": {
+                        "role":        {"type": "string"},
+                        "company":     {"type": "string"},
+                        "start_date":  {"type": "string"},
+                        "end_date":    {"type": "string"},
+                        "description": {"type": "string"}
+                    },
+                    "required": ["role", "company", "start_date", "description"]
+                }
+            },
+            "required": ["user_id", "experience"]
+        }
+    },
     {
         "name": "get_user_session",
         "description": "Retrieve conversation state for a user.",
