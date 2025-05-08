@@ -3,7 +3,6 @@ import json
 from .session_manager import get_user_session, save_user_session
 from .ai_helper import generate_ai_response
 from update_content.ai_helper import add_experience, add_project
-from update_content.html_parser import parse_html
 from update_content.github_helper import commit_html
 
 TOOLS = {
@@ -12,7 +11,6 @@ TOOLS = {
     "generate_ai_response": generate_ai_response,
     "add_project": add_project,
     "add_experience": add_experience,
-    "parse_html": parse_html,
     "commit_html": commit_html,
 }
 
@@ -92,17 +90,6 @@ FUNCTION_SPECS = [
                 "functions": {"type": "array", "items": {"type": "object"}}
             },
             "required": ["messages", "functions"],
-        },
-    },
-    {
-        "name": "parse_html",
-        "description": "Parse raw HTML into deployable components (path, content).",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "html": {"type": "string"}
-            },
-            "required": ["html"],
         },
     },
     {
