@@ -9,7 +9,7 @@ from .tools import TOOLS, FUNCTION_SPECS
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
 AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com"
 DEPLOYMENT_NAME = "gpt-4o"
-client = OpenAI(api_key=AZURE_OPENAI_KEY, endpoint=AZURE_OPENAI_ENDPOINT, deployment_name=DEPLOYMENT_NAME)
+client = OpenAI(api_key=AZURE_OPENAI_KEY)
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
