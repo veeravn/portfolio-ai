@@ -5,10 +5,15 @@ from openai import OpenAI
 
 
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
-AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com"
+AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com/"
 DEPLOYMENT_NAME = "gpt-4o"
 
-client = OpenAI(api_key=AZURE_OPENAI_KEY)
+client = OpenAI(
+    api_key    = AZURE_OPENAI_KEY,        # or OPENAI_API_KEY
+    api_base   = AZURE_OPENAI_ENDPOINT,   # must end in a slash
+    api_type   = "azure",
+    api_version= "2023-06-01-preview",
+)
 
 update_content_url = "https://veeravnchatbotfunction.azurewebsites.net/api/update_content"
 
