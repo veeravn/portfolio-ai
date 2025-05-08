@@ -7,7 +7,9 @@ from .tools import TOOLS, FUNCTION_SPECS
 
 # Initialize OpenAI client once
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
-client = OpenAI(api_key=AZURE_OPENAI_KEY)
+AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com"
+DEPLOYMENT_NAME = "gpt-4o"
+client = OpenAI(api_key=AZURE_OPENAI_KEY, endpoint=AZURE_OPENAI_ENDPOINT, deployment_name=DEPLOYMENT_NAME)
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
@@ -24,7 +26,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # Ask model to choose a tool or reply directly
         chat_resp = client.chat.completions.create(
-            model="gpt-4o",
+            model=DEPLOYMENT_NAME,
             messages=messages,
             functions=FUNCTION_SPECS,
             function_call="auto"
@@ -43,7 +45,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                 "content": json.dumps(result)
             })
             followup = client.chat.completions.create(
-                model="gpt-4o",
+                model=DEPLOYMENT_NAME,
                 messages=messages
             )
             agent_reply = followup.choices[0].message.content
