@@ -3,11 +3,12 @@ import json
 import requests
 from openai import OpenAI
 
-client = OpenAI()
 
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
 AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com"
 DEPLOYMENT_NAME = "gpt-4o"
+
+client = OpenAI(api_key=AZURE_OPENAI_KEY)
 
 update_content_url = "https://veeravnchatbotfunction.azurewebsites.net/api/update_content"
 
