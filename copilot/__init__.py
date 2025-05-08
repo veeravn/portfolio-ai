@@ -2,10 +2,12 @@ import json
 import logging
 import azure.functions as func
 from openai import OpenAI
+import os
 from .tools import TOOLS, FUNCTION_SPECS
 
 # Initialize OpenAI client once
-client = OpenAI()
+AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
+client = OpenAI(api_key=AZURE_OPENAI_KEY)
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     try:
