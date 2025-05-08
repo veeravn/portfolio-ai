@@ -2,7 +2,7 @@
 import json
 from .session_manager import get_user_session, save_user_session
 from .ai_helper import generate_ai_response
-from update_content.ai_helper import send_update_request
+from update_content.ai_helper import add_experience, add_project
 from update_content.html_parser import parse_html
 from update_content.github_helper import commit_html
 
@@ -10,7 +10,8 @@ TOOLS = {
     "get_user_session": get_user_session,
     "save_user_session": save_user_session,
     "generate_ai_response": generate_ai_response,
-    "send_update_request": send_update_request,
+    "add_project": add_project,
+    "add_experience": add_experience,
     "parse_html": parse_html,
     "commit_html": commit_html,
 }
@@ -91,18 +92,6 @@ FUNCTION_SPECS = [
                 "functions": {"type": "array", "items": {"type": "object"}}
             },
             "required": ["messages", "functions"],
-        },
-    },
-    {
-        "name": "send_update_request",
-        "description": "Process and commit new HTML content to GitHub Pages.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "user_id": {"type": "string"},
-                "html_content": {"type": "string"}
-            },
-            "required": ["user_id", "html_content"],
         },
     },
     {
