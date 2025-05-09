@@ -7,7 +7,6 @@ FUNCTION_SPECS = [
         "parameters": {
             "type": "object",
             "properties": {
-                "user_id": {"type": "string"},
                 "project": {
                     "type": "object",
                     "properties": {
@@ -18,7 +17,7 @@ FUNCTION_SPECS = [
                     "required": ["title", "description"]
                 }
             },
-            "required": ["user_id", "project"]
+            "required": ["project"]
         }
     },
     {
@@ -27,7 +26,6 @@ FUNCTION_SPECS = [
         "parameters": {
             "type": "object",
             "properties": {
-                "user_id": {"type": "string"},
                 "experience": {
                     "type": "object",
                     "properties": {
@@ -40,7 +38,7 @@ FUNCTION_SPECS = [
                     "required": ["role", "company", "start_date", "description"]
                 }
             },
-            "required": ["user_id", "experience"]
+            "required": ["experience"]
         }
     },
     {
