@@ -23,25 +23,47 @@ def insert_project(html: str, project: dict) -> str:
     Inserts a new project card into the #projects section of the HTML.
     """
     soup = BeautifulSoup(html, "html.parser")
-    section = soup.find(id="projects")
+    section = soup.find("section", class_="projects section")
     if section is None:
         raise ValueError("Projects section not found in HTML.")
+    inner = section.find("div", class_="section-inner")
+    content = inner.find("div", class_="content")
 
-    card = soup.new_tag("div", **{"class": "project-card"})
-    title = soup.new_tag("h3")
-    title.string = project.get("title", "")
-    desc = soup.new_tag("p")
-    desc.string = project.get("description", "")
-    card.append(title)
-    card.append(desc)
+    # Build the new project item
+    item = soup.new_tag("div", **{"class": "item"})
 
-    link = project.get("link")
-    if link:
-        a = soup.new_tag("a", href=link)
-        a.string = "View Project"
-        card.append(a)
+    # Title/link
+    h3 = soup.new_tag("h3", **{"class": "title"})
+    a = soup.new_tag(
+        "a",
+        href=project.get("link", "#"),
+        target="_blank"
+    )
+    a.string = project["title"]
+    h3.append(a)
+    item.append(h3)
 
-    section.append(card)
+    # Summary paragraph
+    p = soup.new_tag("p", **{"class": "summary"})
+    # Description text
+    p.append(project["description"])
+    # Line break
+    p.append(soup.new_tag("br"))
+    # Bolded "Technology Stack -"
+    b = soup.new_tag("b")
+    b.string = "Technology Stack -"
+    p.append(b)
+    # Technologies list
+    techs = project.get("technologies", [])
+    if isinstance(techs, list):
+        p.append(" " + ", ".join(techs))
+    else:
+        p.append(" " + str(techs))
+    p.append(".")
+
+    item.append(p)
+    content.append(item)
+
     return str(soup)
 
 def insert_experience(html: str, experience: dict) -> str:
@@ -49,22 +71,50 @@ def insert_experience(html: str, experience: dict) -> str:
     Inserts a new work experience entry into the #experience section of the HTML.
     """
     soup = BeautifulSoup(html, "html.parser")
-    section = soup.find(id="experience")
+    section = soup.find("section", class_="experience section")
     if section is None:
         raise ValueError("Experience section not found in HTML.")
+    inner = section.find("div", class_="section-inner")
+    content = inner.find("div", class_="content")
 
-    entry = soup.new_tag("div", **{"class": "experience-entry"})
-    header = soup.new_tag("h3")
-    header.string = f"{experience.get('role', '')} at {experience.get('company', '')}"
-    dates = soup.new_tag("span")
-    start = experience.get("start_date", "")
+    item = soup.new_tag("div", **{"class": "item"})
+    title_h3 = soup.new_tag("h3", **{"class": "title"})
+    title_h3.append(f"{experience['role']} - ")
+    place_span = soup.new_tag("span", **{"class": "place"})
+    a_tag = soup.new_tag(
+        "a",
+        href=experience.get("company_link", "#"),
+        target="_blank"
+    )
+    a_tag.string = experience["company"]
+    place_span.append(a_tag)
+    title_h3.append(place_span)
+
+    # Year span
+    start = experience["start_date"]
     end = experience.get("end_date", "Present")
-    dates.string = f"{start} - {end}"
-    desc = soup.new_tag("p")
-    desc.string = experience.get("description", "")
+    year_span = soup.new_tag("span", **{"class": "year"})
+    year_span.string = f"({start} - {end})"
+    title_h3.append(year_span)
 
-    entry.append(header)
-    entry.append(dates)
-    entry.append(desc)
-    section.append(entry)
+    item.append(title_h3)
+
+    # Description paragraph
+    desc_p = soup.new_tag("p")
+    desc_p.append(experience["description"])
+    desc_p.append(soup.new_tag("br"))
+
+    # Environment line
+    strong = soup.new_tag("strong")
+    strong.string = "Environment -"
+    desc_p.append(strong)
+
+    # Append environment list
+    envs = experience.get("environment", [])
+    env_text = " " + ", ".join(envs) + "."
+    desc_p.append(env_text)
+
+    item.append(desc_p)
+    
+    content.append(item)
     return str(soup)
