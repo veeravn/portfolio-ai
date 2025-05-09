@@ -9,7 +9,7 @@ def read_portfolio_html(user_id: str) -> str:
     Fetches the portfolio HTML (index.html) from the GitHub repository.
     """
     token = os.getenv("GITHUB_TOKEN")
-    repo = os.getenv("GITHUB_REPO", "veeravn/portfolio-ai")
+    repo = os.getenv("GITHUB_REPO", "veeravn/veeravn.github.io")
     path = "index.html"
     url = f"https://api.github.com/repos/{repo}/contents/{path}"
     headers = {"Authorization": f"token {token}"}

@@ -50,6 +50,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
             # a function call was returned
             name = msg.function_call.name
             args = json.loads(msg.function_call.arguments)
+            args.setdefault("user_id", user_id)  # Ensure user_id is passed to the function
             result = await TOOLS[name](**args)
 
             messages.append({
