@@ -11,7 +11,7 @@ async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
     """
     html = read_portfolio_html(user_id)
     updated = insert_project(html, project)
-    commit_result = commit_html(user_id, updated, section="projects")
+    commit_result = commit_html("index.html", updated)
     return {"status": "success", "section": "projects", "project": project, "commit": commit_result}
 
 async def add_experience(experience: dict, user_id: str = "portfolio_user") -> dict:
@@ -21,7 +21,7 @@ async def add_experience(experience: dict, user_id: str = "portfolio_user") -> d
     """
     html = read_portfolio_html(user_id)
     updated = insert_experience(html, experience)
-    commit_result = commit_html(user_id, updated, section="experience")
+    commit_result = commit_html("index.html", updated)
     return {
         "status": "success",
         "section": "experience",

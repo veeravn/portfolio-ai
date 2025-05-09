@@ -17,7 +17,7 @@ def commit_html(path: str, content: str) -> dict:
     data = {
         "message": "Automated update via AI agent",
         "content": base64.b64encode(content.encode()).decode(),
-        "branch": "main"
+        "branch": "master"
     }
     if sha:
         data["sha"] = sha
