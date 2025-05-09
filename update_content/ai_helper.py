@@ -9,17 +9,22 @@ async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
     Reads the user's portfolio HTML, inserts a new project card,
     and commits the updated HTML back to GitHub.
     """
-    html = await read_portfolio_html(user_id)
+    html = read_portfolio_html(user_id)
     updated = insert_project(html, project)
-    commit_result = await commit_html(user_id, updated, section="projects")
-    return {"status": "success", "section": "projects", "project": project}
+    commit_result = commit_html(user_id, updated, section="projects")
+    return {"status": "success", "section": "projects", "project": project, "commit": commit_result}
 
 async def add_experience(experience: dict, user_id: str = "portfolio_user") -> dict:
     """
     Reads the user's portfolio HTML, inserts a new experience entry,
     and commits the updated HTML back to GitHub.
     """
-    html = await read_portfolio_html(user_id)
+    html = read_portfolio_html(user_id)
     updated = insert_experience(html, experience)
-    commit_result = await commit_html(user_id, updated, section="experience")
-    return {"status": "success", "section": "experience", "experience": experience}
+    commit_result = commit_html(user_id, updated, section="experience")
+    return {
+        "status": "success",
+        "section": "experience",
+        "experience": experience,
+        "commit": commit_result
+    }
