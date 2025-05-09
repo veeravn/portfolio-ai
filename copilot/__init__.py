@@ -37,12 +37,12 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
         )
         msg = chat_resp.choices[0].message
 
-        if msg.get("function_call"):
+        if msg.function_call:
+            # a function call was returned
             name = msg.function_call.name
             args = json.loads(msg.function_call.arguments)
             result = TOOLS[name](**args)
 
-            # Add function output and get the final reply
             messages.append({
                 "role": "function",
                 "name": name,
