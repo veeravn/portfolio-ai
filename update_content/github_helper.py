@@ -12,6 +12,19 @@ DEFAULT_BRANCH= "master"
 # Allow override via env, but default to master
 GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", DEFAULT_BRANCH)
 
+def _get_file_sha(path: str) -> str | None:
+    """
+    Returns the SHA of the file at `path` on the target branch,
+    or None if the file does not yet exist.
+    """
+    url = f"{API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
+    resp = requests.get(url, params={"ref": GITHUB_BRANCH}, headers=_headers)
+    if resp.status_code == 200:
+        return resp.json().get("sha")
+    if resp.status_code == 404:
+        return None
+    resp.raise_for_status()
+
 def commit_html(content: str, section: str) -> dict:
     """
     Commits the updated HTML content to veeravn/veeravn.github.io on the master branch.
@@ -21,6 +34,7 @@ def commit_html(content: str, section: str) -> dict:
     """
     # Path within the repo to update
     path = f"index.html"
+    sha = _get_file_sha(path)
 
     url = f"{API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
 
@@ -32,11 +46,15 @@ def commit_html(content: str, section: str) -> dict:
         "content": b64_content,
         "branch":  GITHUB_BRANCH,
     }
+    
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept":        "application/vnd.github.v3+json"
     }
-
+    if sha:
+        payload["sha"] = sha
+    
+    
     resp = requests.put(url, json=payload, headers=headers)
     resp.raise_for_status()
     return resp.json()
