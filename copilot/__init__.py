@@ -50,7 +50,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
             # a function call was returned
             name = msg.function_call.name
             args = json.loads(msg.function_call.arguments)
-            result = TOOLS[name](**args)
+            result = await TOOLS[name](**args)
 
             messages.append({
                 "role": "function",
