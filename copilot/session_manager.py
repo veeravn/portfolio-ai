@@ -2,7 +2,7 @@
 
 import os
 import json
-from logging_helper import log_info, log_error
+from .logging_helper import log_info, log_error
 from azure.data.tables import TableServiceClient, UpdateMode
 from azure.core.exceptions import ResourceNotFoundError
 
