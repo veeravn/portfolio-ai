@@ -11,8 +11,7 @@ _CONNECTION_STR = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 if not _CONNECTION_STR:
     raise RuntimeError("Missing AZURE_STORAGE_CONNECTION_STRING connection string")
 _service = TableServiceClient.from_connection_string(conn_str=_CONNECTION_STR)
-_table = _service.get_table_client(table_name="sessions")
-
+_table = _service.get_table_client(table_name="CopilotSessions")
 
 def save_user_session(user_id: str, session_data: dict) -> None:
     """
