@@ -1,6 +1,6 @@
 import json, os
 import azure.functions as func
-from openai import OpenAI
+from openai import AzureOpenAI
 from copilot.tools import FUNCTION_SPECS
 from update_content.ai_helper import add_project, add_experience
 
@@ -11,7 +11,15 @@ TOOLS = {
     # … other tools …
 }
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
+AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com/"
+DEPLOYMENT_NAME = "gpt-4o"
+client = AzureOpenAI(
+    api_key    = AZURE_OPENAI_KEY,        # or OPENAI_API_KEY
+    azure_endpoint   = AZURE_OPENAI_ENDPOINT,   # must end in a slash
+    api_version= "2024-12-01"
+)
+
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
     user_msg = await req.get_json()
