@@ -3,7 +3,15 @@ import logging
 import azure.functions as func
 from openai import AzureOpenAI
 import os
-from .tools import TOOLS, FUNCTION_SPECS
+from .tools import TOOLS
+from function_specs import FUNCTION_SPECS
+from update_content.ai_helper import add_project, add_experience
+
+# Extend the tool registry at runtime
+TOOLS.update({
+    "add_project":    add_project,
+    "add_experience": add_experience,
+})
 
 # Initialize OpenAI client once
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")

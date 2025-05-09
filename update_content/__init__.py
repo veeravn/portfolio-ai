@@ -1,7 +1,7 @@
 import json, os
 import azure.functions as func
+from function_specs import FUNCTION_SPECS
 from openai import AzureOpenAI
-from copilot.tools import FUNCTION_SPECS
 from update_content.ai_helper import add_project, add_experience
 
 # map function-call names to actual implementations
