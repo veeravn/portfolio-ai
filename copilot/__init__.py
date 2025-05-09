@@ -12,7 +12,7 @@ DEPLOYMENT_NAME = "gpt-4o"
 client = AzureOpenAI(
     api_key    = AZURE_OPENAI_KEY,        # or OPENAI_API_KEY
     azure_endpoint   = AZURE_OPENAI_ENDPOINT,   # must end in a slash
-    api_version= "2024-12-01"
+    api_version= "2023-06-01-preview"
 )
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:
