@@ -2,7 +2,7 @@ import os
 import json
 from azure.data.tables import TableServiceClient, UpdateMode
 
-TABLE_NAME = os.getenv("AZ_TABLE_NAME", "sessions")
+TABLE_NAME = os.getenv("AZ_TABLE_NAME", "CopilotSessions")
 CONNECTION_STR = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
 svc_client = TableServiceClient.from_connection_string(CONNECTION_STR)
 table_client = svc_client.get_table_client(TABLE_NAME)
