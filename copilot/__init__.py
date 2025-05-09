@@ -4,6 +4,7 @@ import azure.functions as func
 from openai import AzureOpenAI
 import os
 from .tools import TOOLS
+from .logging_helper import log_info
 from function_specs import FUNCTION_SPECS
 from update_content.ai_helper import add_project, add_experience
 
@@ -64,11 +65,12 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
         else:
             agent_reply = msg.content
 
+        log_info(f"[agent] user_id={user_id} message={user_message} agent_reply={agent_reply}")
         # Persist updated session
         TOOLS["save_user_session"](user_id=user_id, session_data={"history": messages})
 
         return func.HttpResponse(
-            json.dumps({"reply": agent_reply}),
+            json.dumps({"response": agent_reply}),
             status_code=200,
             mimetype="application/json"
         )
