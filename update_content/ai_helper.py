@@ -2,7 +2,7 @@
 
 import json
 
-from copilot.logging_helper import log_error, log_info
+import logging as log
 from .html_parser import read_portfolio_html, insert_project, insert_experience
 from .github_helper import commit_html
 
@@ -16,19 +16,19 @@ async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
     try:
         commit_result = commit_html("index.html", updated)
     except Exception as e:
-        log_error(f"[add_project] commit_html threw: {e}")
+        log.error(f"[add_project] commit_html threw: {e}")
         return {
             "status": "error",
             "error": f"GitHub commit exception: {e}"
         }
     
     if not commit_result.get("commit_url") and not commit_result.get("sha"):
-        log_error(f"[add_project] commit_html returned failure: {commit_result}")
+        log.error(f"[add_project] commit_html returned failure: {commit_result}")
         return {
             "status": "error",
             "error": f"GitHub commit failed: {commit_result}"
         }
-    log_info(f"[add_project] commit_html result: {commit_result}")
+    log.info(f"[add_project] commit_html result: {commit_result}")
     return {"status": "success", "section": "projects", "project": project, "commit": commit_result}
 
 async def add_experience(experience: dict, user_id: str = "portfolio_user") -> dict:
@@ -41,18 +41,18 @@ async def add_experience(experience: dict, user_id: str = "portfolio_user") -> d
     try:
         commit_result = commit_html("index.html", updated)
     except Exception as e:
-        log_error(f"[add_experience] commit_html threw: {e}")
+        log.error(f"[add_experience] commit_html threw: {e}")
         return {
             "status": "error",
             "error": f"GitHub commit exception: {e}"
         }
     if not commit_result.get("commit_url") and not commit_result.get("sha"):
-        log_error(f"[add_experience] commit_html returned failure: {commit_result}")
+        log.error(f"[add_experience] commit_html returned failure: {commit_result}")
         return {
             "status": "error",
             "error": f"GitHub commit failed: {commit_result}"
         }
-    log_info(f"[add_experience] commit_html result: {commit_result}")
+    log.info(f"[add_experience] commit_html result: {commit_result}")
     return {
         "status": "success",
         "section": "experience",
