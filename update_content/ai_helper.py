@@ -14,7 +14,7 @@ async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
     html = read_portfolio_html(user_id)
     updated = insert_project(html, project)
     try:
-        commit_result = commit_html("index.html", updated)
+        commit_result = commit_html(updated, "projects")
     except Exception as e:
         log.error(f"[add_project] commit_html threw: {e}")
         return {
@@ -39,7 +39,7 @@ async def add_experience(experience: dict, user_id: str = "portfolio_user") -> d
     html = read_portfolio_html(user_id)
     updated = insert_experience(html, experience)
     try:
-        commit_result = commit_html("index.html", updated)
+        commit_result = commit_html(updated, "experience")
     except Exception as e:
         log.error(f"[add_experience] commit_html threw: {e}")
         return {
