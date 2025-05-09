@@ -7,3 +7,4 @@ PyGithub
 openai~=1.68.2
 beautifulsoup4
 azure-data-tables
+azure-core

@@ -1,32 +1,44 @@
+# File: copilot/session_manager.py
+
 import os
 import json
-from azure.data.tables import TableClient, UpdateMode
-from copilot.logging_helper import log_info
+from logging_helper import log_info, log_error
+from azure.data.tables import TableServiceClient, UpdateMode
+from azure.core.exceptions import ResourceNotFoundError
 
-TABLE_NAME = "CopilotSessions"
-CONNECTION_STR = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+# Initialize the Table client once
+_CONNECTION_STR = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
+if not _CONNECTION_STR:
+    raise RuntimeError("Missing AZURE_STORAGE_CONNECTION_STRING connection string")
+_service = TableServiceClient.from_connection_string(conn_str=_CONNECTION_STR)
+_table = _service.get_table_client(table_name="sessions")
 
-def get_user_session(user_id: str) -> dict:
-    
-    with TableClient.from_connection_string(
-        conn_str=CONNECTION_STR, table_name=TABLE_NAME
-        ) as table_client:
-            try:
-                entity = table_client.get_entity(partition_key="user", row_key=user_id)
-                return json.loads(entity.get("session_data", "{}"))
-            except:
-                return {"history": []}
 
 def save_user_session(user_id: str, session_data: dict) -> None:
+    """
+    Upserts a single entity per user into the 'sessions' table.
+    - PartitionKey = session
+    - RowKey       = "default_user" (a constant)
+    - Data  = JSON blob of the session_data dict
+    """
     entity = {
-        "PartitionKey": "user",
-        "RowKey": user_id,
-        "session_data": json.dumps(session_data)
+        "PartitionKey": "session",            # EXACT casing required
+        "RowKey":       user_id,          # EXACT casing required
+        "Data":  json.dumps(session_data)
     }
-    # Debug: log what you’re actually sending
-    log_info(f"About to upsert Table entity with keys: {list(entity.keys())}")
-    with TableClient.from_connection_string(
-       conn_str=CONNECTION_STR, table_name=TABLE_NAME
-       ) as table_client:
-            table_client.upsert_entity(entity, mode=UpdateMode.MERGE)
 
+    log_info(f"[session_manager] upserting entity keys={list(entity.keys())} for user_id={user_id}")
+    _table.upsert_entity(entity=entity, mode=UpdateMode.MERGE)
+
+
+def get_user_session(user_id: str) -> dict:
+    """
+    Retrieves the saved session_data for a given user_id.
+    Returns an empty dict if none exists.
+    """
+    try:
+        ent = _table.get_entity(partition_key="session", row_key=user_id)
+        return json.loads(ent["Data"])
+    except ResourceNotFoundError:
+        log_error("[session_manager] no existing session for user_id={user_id}")
+        return {}

@@ -3,5 +3,6 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
+azure-core
 openai~=1.68.2
 azure-data-tables
