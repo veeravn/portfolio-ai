@@ -26,4 +26,5 @@ def commit_html(path: str, content: str) -> dict:
         json=data,
         headers={"Authorization": f"token {token}"}
     )
+    put_resp.raise_for_status()
     return put_resp.json()
