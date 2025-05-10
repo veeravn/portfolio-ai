@@ -6,7 +6,7 @@ import logging as log
 from .html_parser import read_portfolio_html, insert_project, insert_experience
 from .github_helper import commit_html
 
-async def add_project(project: dict, user_id: str = "default_user") -> dict:
+async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
     html    = read_portfolio_html(user_id)
     updated = insert_project(html, project)
 

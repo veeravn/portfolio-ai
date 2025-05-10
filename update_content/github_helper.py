@@ -1,6 +1,7 @@
 import os
 import base64
 import requests
+import logging as log
 
 # GitHub repo settings
 GITHUB_TOKEN  = os.getenv("GITHUB_TOKEN")
@@ -40,13 +41,13 @@ def commit_html(content: str, section: str) -> dict:
 
     # GitHub expects base64-encoded content
     b64_content = base64.b64encode(content.encode("utf-8")).decode("utf-8")
-
+    log.info(f"[commit_html] b64_content: {b64_content}")
     payload = {
         "message": f"Agent update to {section} section",
         "content": b64_content,
         "branch":  GITHUB_BRANCH,
     }
-    
+    log.info(f"[commit_html] token: {GITHUB_TOKEN}")
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept":        "application/vnd.github.v3+json"
