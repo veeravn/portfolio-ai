@@ -3,7 +3,7 @@ import logging
 import azure.functions as func
 from openai import AzureOpenAI
 import os
-from tools import TOOLS
+from .tools import TOOLS
 from .logging_helper import log_info
 from function_specs import FUNCTION_SPECS
 from update_content.ai_helper import add_project, add_experience
@@ -63,6 +63,11 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
                 messages=messages
             )
             agent_reply = followup.choices[0].message.content
+
+            # Only _after_ a successful commit, clear the session
+            if result.get("status") == "success":
+                user_id = args.get("user_id", "portfolio_user")
+                TOOLS["delete_user_session"](user_id=user_id)
         else:
             agent_reply = msg.content
 
