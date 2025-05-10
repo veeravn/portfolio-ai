@@ -19,6 +19,10 @@ def _get_file_sha(path: str) -> str | None:
     or None if the file does not yet exist.
     """
     url = f"{API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
+    _headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept":        "application/vnd.github.v3+json"
+    }
     resp = requests.get(url, params={"ref": GITHUB_BRANCH}, headers=_headers)
     if resp.status_code == 200:
         return resp.json().get("sha")
