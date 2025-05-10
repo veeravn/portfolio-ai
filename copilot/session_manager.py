@@ -41,3 +41,9 @@ def get_user_session(user_id: str) -> dict:
     except ResourceNotFoundError:
         log_error("[session_manager] no existing session for user_id={user_id}")
         return {}
+
+def delete_user_session(user_id: str) -> None:
+    """
+    Deletes the stored session for the given user_id.
+    """
+    _table.delete_entity(partition_key="session", row_key=user_id)

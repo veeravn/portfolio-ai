@@ -5,6 +5,7 @@ import json
 import logging as log
 from .html_parser import read_portfolio_html, insert_project, insert_experience
 from .github_helper import commit_html
+from copilot.session_manager import delete_user_session
 
 async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
     html    = read_portfolio_html(user_id)
@@ -22,6 +23,14 @@ async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
             "error": detail
         }
     log.info(f"[add_project] commit_html result: {commit_result}")
+
+    # Clear out the in-flight session now that the work is done
+    try:
+        delete_user_session(user_id)
+    except Exception as e:
+        # Log or ignore—failure to delete is non-fatal
+        print(f"[add_project] failed to delete session: {e}")
+
     return {
         "status":     "success",
         "section":    "projects",
@@ -51,6 +60,12 @@ async def add_experience(experience: dict, user_id: str = "portfolio_user") -> d
             "error": f"GitHub commit failed: {commit_result}"
         }
     log.info(f"[add_experience] commit_html result: {commit_result}")
+
+    try:
+        delete_user_session(user_id)
+    except Exception as e:
+        print(f"[add_experience] failed to delete session: {e}")
+    
     return {
         "status": "success",
         "section": "experience",

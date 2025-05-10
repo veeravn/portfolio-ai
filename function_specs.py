@@ -9,17 +9,31 @@ FUNCTION_SPECS = [
             "properties": {
                 "user_id": {
                     "type": "string",
-                    "description": "The identifier of the user (defaults to the default user).",
-                    "default": "default_user"
+                    "description": "The identifier of the user (defaults to the portfolio user).",
+                    "default": "portfolio_user"
                 },
                 "project": {
                     "type": "object",
                     "properties": {
-                        "title":       {"type": "string"},
-                        "description": {"type": "string"},
-                        "link":        {"type": "string"}
+                        "title": {
+                            "type": "string",
+                            "description": "The title of the project."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "A brief summary of what the project does."
+                        },
+                        "link": {
+                            "type": "string",
+                            "description": "URL where the project is hosted or its repo."
+                        },
+                        "technologies": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of technologies used in this project."
+                        }
                     },
-                    "required": ["title", "description"]
+                    "required": ["title", "description", "technologies"]
                 }
             },
             "required": ["project"]
@@ -39,13 +53,33 @@ FUNCTION_SPECS = [
                 "experience": {
                     "type": "object",
                     "properties": {
-                        "role":        {"type": "string"},
-                        "company":     {"type": "string"},
-                        "start_date":  {"type": "string"},
-                        "end_date":    {"type": "string"},
-                        "description": {"type": "string"}
+                        "role": {
+                            "type": "string",
+                            "description": "Job title or role held."
+                        },
+                        "company": {
+                            "type": "string",
+                            "description": "Name of the company."
+                        },
+                        "start_date": {
+                            "type": "string",
+                            "description": "When the role started (e.g. '2022')."
+                        },
+                        "end_date": {
+                            "type": "string",
+                            "description": "When the role ended or 'Present'."
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Brief summary of responsibilities and achievements."
+                        },
+                        "environment": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "description": "List of technologies and tools used in this role."
+                        }
                     },
-                    "required": ["role", "company", "start_date", "description"]
+                    "required": ["role", "company", "start_date", "description", "environment"]
                 }
             },
             "required": ["experience"]
