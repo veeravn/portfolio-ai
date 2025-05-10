@@ -3,7 +3,7 @@ import logging
 import azure.functions as func
 from openai import AzureOpenAI
 import os
-from .tools import TOOLS
+from tools import TOOLS
 from .logging_helper import log_info
 from function_specs import FUNCTION_SPECS
 from update_content.ai_helper import add_project, add_experience
