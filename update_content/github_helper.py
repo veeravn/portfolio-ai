@@ -1,6 +1,7 @@
 import os
 import base64
 import requests
+from bs4 import BeautifulSoup
 
 # GitHub repo settings
 GITHUB_TOKEN  = os.getenv("GITHUB_TOKEN")
@@ -42,8 +43,11 @@ def commit_html(content: str, section: str) -> dict:
 
     url = f"{API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
 
+    # Prettify the HTML for cleaner formatting
+    pretty_html = BeautifulSoup(content, "html.parser").prettify()
+
     # GitHub expects base64-encoded content
-    b64_content = base64.b64encode(content.encode("utf-8")).decode("utf-8")
+    b64_content = base64.b64encode(pretty_html.encode("utf-8")).decode("utf-8")
 
     payload = {
         "message": f"Agent update to {section} section",
