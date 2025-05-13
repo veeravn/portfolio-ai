@@ -44,7 +44,7 @@ def commit_html(content: str, section: str) -> dict:
     url = f"{API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
 
     # Prettify the HTML for cleaner formatting
-    pretty_html = BeautifulSoup(content, "html.parser").prettify()
+    pretty_html = BeautifulSoup(content, "html.parser").prettify(formatter='html')
 
     # GitHub expects base64-encoded content
     b64_content = base64.b64encode(pretty_html.encode("utf-8")).decode("utf-8")
