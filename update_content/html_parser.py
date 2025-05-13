@@ -130,7 +130,7 @@ def update_project(html: str, project: dict) -> str:
     the title in an <a> (or update the existing one).
     """
     soup = BeautifulSoup(html, "html.parser")
-    container = soup.find("div", class_="projects section")
+    container = soup.find("section", class_="projects section")
     if not container:
         raise ValueError("Could not find .projects container")
 
@@ -195,64 +195,55 @@ def update_project(html: str, project: dict) -> str:
 
 def update_experience(html: str, experience: dict) -> str:
     """
-    Update an existing experience <div class="item"> by matching the role+company text
-    inside <h3 class="title">, regardless of <a> presence.
+    Update an existing experience entry, matching on role (and optionally company),
+    and patch only the provided fields. Now respects absence of 'description'.
     """
     soup = BeautifulSoup(html, "html.parser")
-    container = soup.find("div", class_="experience section")
+    container = soup.find("section", class_="experience section")
     if not container:
-        raise ValueError("Could not find .experience container")
+        raise ValueError("Could not find experience container")
+
+    role    = experience.get("role")
+    company = experience.get("company")
+    # Notice: we do _not_ pull `description` yet
 
     for item in container.find_all("div", class_="item"):
         h3 = item.find("h3", class_="title")
         if not h3:
             continue
 
-        full_text = h3.get_text(separator=" ").replace("\n", " ").strip()
-        # expected start: "Software Engineer II - Microsoft (2022 - 2025)"
-        role, _, rest = full_text.partition(" - ")
-        if role != experience["role"]:
+        full_text = h3.get_text(separator=" ").strip()
+        before_dash, _, after_dash = full_text.partition(" - ")
+        if role and before_dash.strip() != role:
             continue
-        if experience["company"] not in rest:
+        if company and company not in after_dash:
             continue
 
-        # 1) Update company link if provided
-        if experience.get("company_link"):
-            a = h3.find("a")
-            if a:
-                a["href"] = experience["company_link"]
-            else:
-                # wrap company name in <a>
-                span = h3.find("span", class_="place")
-                if span:
-                    text = span.get_text(strip=True)
-                    span.clear()
-                    new_a = soup.new_tag("a", href=experience["company_link"], target="_blank")
-                    new_a.string = text
-                    span.append(new_a)
-
-        # 2) Update dates
-        if experience.get("start_date") or experience.get("end_date"):
-            year_span = h3.find("span", class_="year")
+        # — Update dates if provided —
+        if "start_date" in experience or "end_date" in experience:
             start = experience.get("start_date", "").strip()
             end   = experience.get("end_date", "").strip()
+            year_span = h3.find("span", class_="year")
             if year_span:
                 year_span.string = f"({start or year_span.text.strip('()')} - {end or 'Present'})"
 
-        # 3) Update description
-        if experience.get("description"):
+        # — ONLY update description if the key was present —
+        if "description" in experience:
+            new_desc = experience["description"]
             p = item.find("p")
-            # clear everything up to <strong>
-            new_nodes = []
-            for node in list(p.contents):
-                if getattr(node, "name", "") == "strong":
-                    break
-                node.extract()
-            p.insert(0, experience["description"])
-            p.insert(1, soup.new_tag("br"))
+            if p:
+                # Remove everything up to the <strong> (env) or end
+                for node in list(p.contents):
+                    if getattr(node, "name", "") == "strong":
+                        break
+                    node.extract()
+                # Insert new description + <br>
+                p.insert(0, new_desc)
+                p.insert(1, soup.new_tag("br"))
 
-        # 4) Update environment
-        if experience.get("environment"):
+        # — Update environment if provided —
+        if "environment" in experience:
+            envs = experience["environment"]
             p = item.find("p")
             strong = p.find("strong")
             if not strong:
@@ -260,14 +251,14 @@ def update_experience(html: str, experience: dict) -> str:
                 strong = soup.new_tag("strong")
                 strong.string = "Environment -"
                 p.append(strong)
-            else:
-                # remove old env text
-                for sib in list(strong.next_siblings):
-                    sib.extract()
-            strong.insert_after(f" {', '.join(experience['environment'])}.")
+            # Clear old env text
+            for sib in list(strong.next_siblings):
+                sib.extract()
+            strong.insert_after(f" {', '.join(envs)}.")
 
         return str(soup)
 
-    raise ValueError(
-        f"No experience for role='{experience['role']}' at company='{experience['company']}' found"
-    )
+    criteria = f"role='{role}'"
+    if company:
+        criteria += f", company='{company}'"
+    raise ValueError(f"No experience entry matching {criteria} found")
