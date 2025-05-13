@@ -4,6 +4,10 @@ import requests
 import base64
 from bs4 import BeautifulSoup
 import logging as log
+import re
+
+def _normalize(text: str) -> str:
+    return re.sub(r"\s+", " ", text.strip().lower())
 
 def read_portfolio_html(user_id: str) -> str:
     """
@@ -205,60 +209,75 @@ def update_experience(html: str, experience: dict) -> str:
 
     role    = experience.get("role")
     company = experience.get("company")
+    norm_role    = _normalize(role)    if role    else None
+    norm_company = _normalize(company) if company else None
     # Notice: we do _not_ pull `description` yet
 
+    candidates = []
     for item in container.find_all("div", class_="item"):
         h3 = item.find("h3", class_="title")
         if not h3:
             continue
 
-        full_text = h3.get_text(separator=" ").strip()
-        before_dash, _, after_dash = full_text.partition(" - ")
-        if role and before_dash.strip() != role:
+        full_text = h3.get_text(separator=" ").replace("\n", " ")
+        norm_text = _normalize(full_text)
+        
+        # Extract role and company fragments
+        before_dash, _, after_dash = norm_text.partition(" - ")
+        # strip off the year span at end for matching
+        after_dash = re.sub(r"\(\d{4}\s*[–-]\s*\d{4}\)", "", after_dash).strip()
+
+        # Check role match
+        if norm_role and norm_role not in before_dash:
             continue
-        if company and company not in after_dash:
+        # Check company match, if provided
+        if norm_company and norm_company not in after_dash:
             continue
 
-        # — Update dates if provided —
-        if "start_date" in experience or "end_date" in experience:
-            start = experience.get("start_date", "").strip()
-            end   = experience.get("end_date", "").strip()
-            year_span = h3.find("span", class_="year")
-            if year_span:
-                year_span.string = f"({start or year_span.text.strip('()')} - {end or 'Present'})"
+        candidates.append((item, before_dash, after_dash))
 
-        # — ONLY update description if the key was present —
-        if "description" in experience:
-            new_desc = experience["description"]
-            p = item.find("p")
-            if p:
-                # Remove everything up to the <strong> (env) or end
-                for node in list(p.contents):
-                    if getattr(node, "name", "") == "strong":
-                        break
-                    node.extract()
-                # Insert new description + <br>
-                p.insert(0, new_desc)
-                p.insert(1, soup.new_tag("br"))
+    if not candidates:
+        crit = f"role='{role}'"
+        if company:
+            crit += f", company='{company}'"
+        raise ValueError(f"No experience entry matching {crit} found")
+    
+    # If multiple candidates but only role was specified, pick the first
+    item, _, _ = candidates[0]
 
-        # — Update environment if provided —
-        if "environment" in experience:
-            envs = experience["environment"]
-            p = item.find("p")
-            strong = p.find("strong")
-            if not strong:
-                p.append(soup.new_tag("br"))
-                strong = soup.new_tag("strong")
-                strong.string = "Environment -"
-                p.append(strong)
-            # Clear old env text
-            for sib in list(strong.next_siblings):
-                sib.extract()
-            strong.insert_after(f" {', '.join(envs)}.")
+    # 1) Update start/end dates if provided
+    if "start_date" in experience or "end_date" in experience:
+        year_span = item.find("span", class_="year")
+        if year_span:
+            start = experience.get("start_date", "") or year_span.text.strip("()").split(" - ")[0]
+            end   = experience.get("end_date", "")   or "Present"
+            year_span.string = f"({start} - {end})"
 
-        return str(soup)
+    # 2) Update description only if explicitly provided
+    if "description" in experience:
+        p = item.find("p")
+        if p:
+            # Remove existing text up to the <strong>
+            for node in list(p.contents):
+                if getattr(node, "name", "") == "strong":
+                    break
+                node.extract()
+            # Insert new description + <br>
+            p.insert(0, experience["description"])
+            p.insert(1, soup.new_tag("br"))
 
-    criteria = f"role='{role}'"
-    if company:
-        criteria += f", company='{company}'"
-    raise ValueError(f"No experience entry matching {criteria} found")
+    # 3) Update environment only if explicitly provided
+    if "environment" in experience:
+        p = item.find("p")
+        strong = p.find("strong")
+        if not strong:
+            p.append(soup.new_tag("br"))
+            strong = soup.new_tag("strong")
+            strong.string = "Environment -"
+            p.append(strong)
+        # Remove old environment text
+        for sib in list(strong.next_siblings):
+            sib.extract()
+        strong.insert_after(f" {', '.join(experience['environment'])}.")
+
+    return str(soup)
