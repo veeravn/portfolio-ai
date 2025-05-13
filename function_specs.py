@@ -86,6 +86,69 @@ FUNCTION_SPECS = [
         }
     },
     {
+        "name": "update_project",
+        "description": "Update an existing project entry in the Projects section.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {"type": "string", "default": "default_user"},
+                "project": {
+                    "type": "object",
+                    "properties": {
+                        "title":        {"type": "string"},
+                        "description":  {"type": "string"},
+                        "link":         {"type": "string"},
+                        "technologies": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        }
+                    },
+                    "required": ["title"],
+                    "oneOf": [
+                        {"required": ["description"]},
+                        {"required": ["link"]},
+                        {"required": ["technologies"]}
+                    ]
+                }
+            },
+            "required": ["user_id", "project"]
+        }
+    },
+    {
+        "name": "update_experience",
+        "description": "Update an existing work-experience entry in the Experience section.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "user_id": {"type": "string", "default": "default_user"},
+                "experience": {
+                    "type": "object",
+                    "properties": {
+                        "role":        {"type": "string"},
+                        "company":     {"type": "string"},
+                        "company_link":{"type": "string"},
+                        "start_date":  {"type": "string"},
+                        "end_date":    {"type": "string"},
+                        "description": {"type": "string"},
+                        "environment": {
+                            "type": "array",
+                            "items": {"type": "string"}
+                        }
+                    },
+                    "required": ["role", "company"],
+                    "oneOf": [
+                        {"required": ["start_date"]},
+                        {"required": ["end_date"]},
+                        {"required": ["description"]},
+                        {"required": ["environment"]},
+                        {"required": ["company_link"]}
+                    ]
+                }
+            },
+            "required": ["user_id", "experience"]
+        }
+    },
+    {
         "name": "get_user_session",
         "description": "Retrieve conversation state for a user.",
         "parameters": {

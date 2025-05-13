@@ -6,12 +6,14 @@ import os
 from .tools import TOOLS
 from .logging_helper import log_info
 from function_specs import FUNCTION_SPECS
-from update_content.ai_helper import add_project, add_experience
+from update_content.ai_helper import add_project, add_experience, update_project, update_experience
 
 # Extend the tool registry at runtime
 TOOLS.update({
     "add_project":    add_project,
     "add_experience": add_experience,
+    "update_project":    update_project,
+    "update_experience": update_experience
 })
 
 # Initialize OpenAI client once

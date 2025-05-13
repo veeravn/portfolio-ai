@@ -3,7 +3,7 @@
 import json
 
 import logging as log
-from .html_parser import read_portfolio_html, insert_project, insert_experience
+from .html_parser import read_portfolio_html, insert_project, insert_experience, update_project, update_experience
 from .github_helper import commit_html
 
 async def add_project(project: dict, user_id: str = "portfolio_user") -> dict:
@@ -59,3 +59,15 @@ async def add_experience(experience: dict, user_id: str = "portfolio_user") -> d
         "experience": experience,
         "commit": commit_result
     }
+
+async def edit_project(project: dict, user_id: str = "default_user") -> dict:
+    html     = read_portfolio_html(user_id)
+    updated  = update_project(html, project)
+    resp     = commit_html(user_id=user_id, content=updated, section="projects")
+    return {"status":"success", "commit":resp}
+
+async def edit_experience(experience: dict, user_id: str = "default_user") -> dict:
+    html     = read_portfolio_html(user_id)
+    updated  = update_experience(html, experience)
+    resp     = commit_html(user_id=user_id, content=updated, section="experience")
+    return {"status":"success", "commit":resp}
