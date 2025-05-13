@@ -63,11 +63,11 @@ async def add_experience(experience: dict, user_id: str = "portfolio_user") -> d
 async def edit_project(project: dict, user_id: str = "default_user") -> dict:
     html     = read_portfolio_html(user_id)
     updated  = update_project(html, project)
-    resp     = commit_html(user_id=user_id, content=updated, section="projects")
+    resp     = commit_html(content=updated, section="projects")
     return {"status":"success", "commit":resp}
 
 async def edit_experience(experience: dict, user_id: str = "default_user") -> dict:
     html     = read_portfolio_html(user_id)
     updated  = update_experience(html, experience)
-    resp     = commit_html(user_id=user_id, content=updated, section="experience")
+    resp     = commit_html(content=updated, section="experience")
     return {"status":"success", "commit":resp}
