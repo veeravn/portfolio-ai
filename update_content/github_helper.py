@@ -2,6 +2,7 @@ import os
 import base64
 import requests
 from bs4 import BeautifulSoup
+from bs4.formatter import HTMLFormatter
 
 # GitHub repo settings
 GITHUB_TOKEN  = os.getenv("GITHUB_TOKEN")
@@ -12,6 +13,8 @@ DEFAULT_BRANCH= "master"
 
 # Allow override via env, but default to master
 GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", DEFAULT_BRANCH)
+FORMATTER = HTMLFormatter(indent=4)
+
 
 def _get_file_sha(path: str) -> str | None:
     """
@@ -44,7 +47,7 @@ def commit_html(content: str, section: str) -> dict:
     url = f"{API_BASE}/repos/{REPO_OWNER}/{REPO_NAME}/contents/{path}"
 
     # Prettify the HTML for cleaner formatting
-    pretty_html = BeautifulSoup(content, "html.parser").prettify(formatter='html')
+    pretty_html = BeautifulSoup(content, "html.parser").prettify(formatter=FORMATTER)
 
     # GitHub expects base64-encoded content
     b64_content = base64.b64encode(pretty_html.encode("utf-8")).decode("utf-8")
