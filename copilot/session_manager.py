@@ -5,12 +5,12 @@ import json
 from .logging_helper import log_info, log_error
 from azure.data.tables import TableServiceClient, UpdateMode
 from azure.core.exceptions import ResourceNotFoundError
+from config.env import AZURE_STORAGE_CONNECTION_STRING
 
 # Initialize the Table client once
-_CONNECTION_STR = os.getenv("AZURE_STORAGE_CONNECTION_STRING")
-if not _CONNECTION_STR:
+if not AZURE_STORAGE_CONNECTION_STRING:
     raise RuntimeError("Missing AZURE_STORAGE_CONNECTION_STRING connection string")
-_service = TableServiceClient.from_connection_string(conn_str=_CONNECTION_STR)
+_service = TableServiceClient.from_connection_string(conn_str=AZURE_STORAGE_CONNECTION_STRING)
 _table = _service.get_table_client(table_name="CopilotSessions")
 
 def save_user_session(user_id: str, session_data: dict) -> None:

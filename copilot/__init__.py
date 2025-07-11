@@ -7,6 +7,7 @@ from .tools import TOOLS
 from .logging_helper import log_info
 from function_specs import FUNCTION_SPECS
 from update_content.ai_helper import add_project, add_experience, edit_project, edit_experience
+from config.env import AZURE_OPENAI_KEY, AZURE_OPENAI_ENDPOINT, DEPLOYMENT_NAME, AZURE_OPENAI_API_VERSION
 
 # Extend the tool registry at runtime
 TOOLS.update({
@@ -17,17 +18,18 @@ TOOLS.update({
 })
 
 # Initialize OpenAI client once
-AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
 if not AZURE_OPENAI_KEY:
     raise ValueError("AZURE_OPENAI_KEY environment variable is not set.")
 else:
     log_info(f"[agent] AZURE_OPENAI_KEY is set. {AZURE_OPENAI_KEY}")
-AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com/"
-DEPLOYMENT_NAME = "gpt-4.1"
+if not AZURE_OPENAI_API_VERSION:
+    raise ValueError("AZURE_OPENAI_API_VERSION environment variable is not set.")
+else:
+    log_info(f"[agent] AZURE_OPENAI_API_VERSION is set. {AZURE_OPENAI_API_VERSION}")
 client = AzureOpenAI(
     api_key             = AZURE_OPENAI_KEY,        # or OPENAI_API_KEY
     azure_endpoint      = AZURE_OPENAI_ENDPOINT,   # must end in a slash
-    api_version         = "2025-01-01-preview"
+    api_version         = AZURE_OPENAI_API_VERSION
 )
 
 async def main(req: func.HttpRequest) -> func.HttpResponse:

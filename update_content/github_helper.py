@@ -3,16 +3,8 @@ import base64
 import requests
 from bs4 import BeautifulSoup
 from bs4.formatter import HTMLFormatter
+from config.env import GITHUB_TOKEN, REPO_OWNER, REPO_NAME, API_BASE, GITHUB_BRANCH
 
-# GitHub repo settings
-GITHUB_TOKEN  = os.getenv("GITHUB_TOKEN")
-REPO_OWNER    = "veeravn"
-REPO_NAME     = "veeravn.github.io"
-API_BASE      = "https://api.github.com"
-DEFAULT_BRANCH= "master"
-
-# Allow override via env, but default to master
-GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", DEFAULT_BRANCH)
 FORMATTER = HTMLFormatter(indent=4)
 
 

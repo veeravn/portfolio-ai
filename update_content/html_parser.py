@@ -1,10 +1,10 @@
 # File: update_content/html_parser.py
-import os
 import requests
 import base64
 from bs4 import BeautifulSoup
 import logging as log
 import re
+from config.env import GITHUB_REPO, GITHUB_TOKEN
 
 def _normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text.strip().lower())
@@ -13,11 +13,11 @@ def read_portfolio_html(user_id: str) -> str:
     """
     Fetches the portfolio HTML (index.html) from the GitHub repository.
     """
-    token = os.getenv("GITHUB_TOKEN")
+    token = GITHUB_TOKEN
     log.info(f"[read_portfolio_html] token: {token}")
     if not token:
         raise ValueError("GITHUB_TOKEN environment variable is not set.")
-    repo = os.getenv("GITHUB_REPO", "veeravn/veeravn.github.io")
+    repo = GITHUB_REPO
     path = "index.html"
     url = f"https://api.github.com/repos/{repo}/contents/{path}"
     headers = {"Authorization": f"token {token}"}

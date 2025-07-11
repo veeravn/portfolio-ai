@@ -3,6 +3,7 @@ import azure.functions as func
 from function_specs import FUNCTION_SPECS
 from openai import AzureOpenAI
 from update_content.ai_helper import add_project, add_experience
+from config.env import AZURE_OPENAI_KEY, AZURE_OPENAI_ENDPOINT, DEPLOYMENT_NAME, AZURE_OPENAI_API_VERSION
 
 # map function-call names to actual implementations
 TOOLS = {
@@ -11,13 +12,11 @@ TOOLS = {
     # … other tools …
 }
 
-AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
-AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com/"
-DEPLOYMENT_NAME = "gpt-4.1"
+AZURE_OPENAI_ENDPOINT = AZURE_OPENAI_ENDPOINT
 client = AzureOpenAI(
     api_key             = AZURE_OPENAI_KEY,        # or OPENAI_API_KEY
     azure_endpoint      = AZURE_OPENAI_ENDPOINT,   # must end in a slash
-    api_version         = "2025-01-01-preview"
+    api_version         = AZURE_OPENAI_API_VERSION
 )
 
 
@@ -27,7 +26,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
 
     # ask the LLM which tool to call
     chat_resp = client.chat.completions.create(
-        model=os.getenv("DEPLOYMENT_NAME"),
+        model=DEPLOYMENT_NAME,
         messages=messages,
         functions=FUNCTION_SPECS,
         function_call="auto"
@@ -42,7 +41,7 @@ async def main(req: func.HttpRequest) -> func.HttpResponse:
 
         # feed the result back for a natural-language wrap-up
         followup = client.chat.completions.create(
-            model=os.getenv("DEPLOYMENT_NAME"),
+            model=DEPLOYMENT_NAME,
             messages=[
                 *messages,
                 {"role":"function", "name":fn_name, "content": json.dumps(result)}
