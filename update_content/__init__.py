@@ -13,11 +13,11 @@ TOOLS = {
 
 AZURE_OPENAI_KEY = os.getenv("AZURE_OPENAI_KEY")
 AZURE_OPENAI_ENDPOINT = "https://veeravn-ai.openai.azure.com/"
-DEPLOYMENT_NAME = "gpt-4o"
+DEPLOYMENT_NAME = "gpt-4.1"
 client = AzureOpenAI(
-    api_key    = AZURE_OPENAI_KEY,        # or OPENAI_API_KEY
-    azure_endpoint   = AZURE_OPENAI_ENDPOINT,   # must end in a slash
-    api_version= "2023-06-01-preview"
+    api_key             = AZURE_OPENAI_KEY,        # or OPENAI_API_KEY
+    azure_endpoint      = AZURE_OPENAI_ENDPOINT,   # must end in a slash
+    api_version         = "2025-01-01-preview"
 )
 
 
