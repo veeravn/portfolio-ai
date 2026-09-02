@@ -4,7 +4,7 @@
 
 azure-functions
 PyGithub
-openai~=3.1.0
+openai~=3.6.0
 beautifulsoup4
 azure-data-tables
 azure-core
