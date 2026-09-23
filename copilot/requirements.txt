@@ -4,5 +4,5 @@
 
 azure-functions
 azure-core
-openai~=3.13.0
+openai~=3.16.2
 azure-data-tables
